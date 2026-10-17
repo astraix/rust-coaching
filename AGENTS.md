@@ -63,8 +63,12 @@ Maintain the tables below as lessons proceed. Read this file at the start of a c
 
 | ID | Topic/concept | Status | Exercise IDs | Notes |
 |---|---|---|---|---|
-| T01 | Getting started: toolchain, Cargo, `main`, build and run | Planned | — | |
-| T02 | Values, bindings, and basic types | Planned | — | |
+| T01 | Getting started: toolchain, Cargo, `main`, build and run | In progress | E01 | Code reviewed successfully; awaiting learner explanation of manifest versus source and check versus run. |
+| T02 | Values, bindings, and basic types | Planned | — | Split into small lessons; T02a covers bindings and mutability first. |
+| T02a | let bindings, mutability, basic integer inference, and printing bound values | Complete | E02 | Reviewed correct solution and learner explanation that mut permits reassignment. |
+| T02b | Shadowing: new bindings, initializer lookup, and type changes | Complete | E03 | Correct code reviewed; learner correctly predicted mutable integer can be shadowed with text. |
+| T02c | Shadowing within nested scopes and making a prepared value immutable | Taught | E04 | Explained local shadowing and making a prepared value immutable; learner skipped E04, so practice is not complete. |
+| T02d | Boolean values, comparisons, and logical operators | Complete | E05 | Correct Boolean expression and all five runtime cases reviewed; learner explains inclusive maximum. |
 | T03 | Functions, expressions, and control flow | Planned | — | |
 | T04 | Ownership, moves, `Copy`, and `Clone` | Planned | — | |
 | T05 | Borrowing, slices, and strings | Planned | — | |
@@ -83,23 +87,26 @@ Maintain the tables below as lessons proceed. Read this file at the start of a c
 
 ### Exercise ledger
 
-No exercises proposed yet. Add rows as exercises are assigned.
-
 | ID | Topic ID | Task and success criteria | Status | Solution path | Review or completion evidence |
 |---|---|---|---|---|---|
+| E01 | T01 | Create a binary Cargo package named workspace-card that prints a short terminal card describing a useful tool of the learner's choice (name, purpose, version). Use fixed text and no dependencies or input. Success: cargo check and cargo run succeed; explain Cargo.toml versus src/main.rs and check versus run. | In progress | excercises/workspace-card/src/main.rs | Reviewed 2026-10-17: correct fixed output includes herdr, version 0.9.1, and purpose; no dependencies or input. cargo check --offline, cargo run --offline, and cargo fmt --check passed. Awaiting learner explanation of Cargo.toml versus src/main.rs and check versus run. |
+| E02 | T02a | Write a small stock tracker with a fixed item label and initial quantity; apply a delivery and a sale to a mutable quantity, then print the label and final quantity using bindings. Use integer arithmetic, no input, dependencies, loops, or extra functions. Keep unchanged bindings immutable; explicitly annotate one integer binding. Temporarily remove mut, run cargo check, and explain the diagnostic before restoring working code. Success: correct quantity, clean compilation, and explanation of why mut is needed. | Complete | excercises/e02-stock-tracker/src/main.rs | Reviewed completion 2026-10-17: immutable label, mutable explicitly annotated i64 quantity; 13 + 22 - 5 = 30. cargo check --offline, cargo run --offline, cargo fmt --check passed. Learner correctly explains mut permits reassignment. Removal-of-mut experiment was not explicitly confirmed; understanding demonstrated through explanation and correct code. |
+| E03 | T02b | Create a download-size display using a fixed integer byte count of at least 2048. Shadow the original name with its whole-KiB value (1 KiB = 1024 bytes), print the result, and use no mut. Choose a nonmultiple of 1024 and explain discarded remainder. Also explain why the lesson example can shadow an integer with text whereas assignment to a mutable integer cannot change its type. Success: correct output, repeated let, and correct reasoning. | Complete | excercises/e03-download-size-display/src/main.rs | Reviewed: 3120 / 1024 prints 3 KiB; no mut, correct shadowing. cargo check --offline, cargo run --offline, cargo fmt --check passed. Learner correctly explains new binding and discarded remainder, but attributed type change to immutability. Explained that a new binding permits a new type and mutable bindings can also be shadowed; learner then correctly predicted the mutable-integer-to-text example compiles because count is shadowed. Reviewed completion. |
+| E04 | T02c | Extend stock tracker with a hypothetical extra-sale preview in a nested block: shadow quantity for preview, print it there, and show actual quantity unchanged after the block. Keep preview immutable. Explain why the outer quantity is unaffected and how an immutable same-name binding could prevent further updates after preparation. Success: preview and actual differ as expected, outer quantity preserved, correct explanation. | Skipped | excercises/e02-stock-tracker/src/main.rs (suggested) | Learner explicitly requested discarding E04; no solution reviewed. |
+| E05 | T02d | Create an upload eligibility checker with fixed file size, maximum size, and maintenance-mode Boolean. Compute and print whether upload is allowed: file must be nonempty, within maximum inclusive, and maintenance off. Use Boolean expressions, immutable bindings, no if/match, input, or dependencies. Try zero, exact maximum, above maximum, and maintenance on. Success: correct true/false results and explanation of boundary choice. | Complete | excercises/e05-upload-eligibility/src/main.rs | Reviewed: correct > 0, <= maximum, and !maintenance expression. cargo check --offline and cargo run --offline passed; outputs false, true, true, false for empty, ordinary, exact maximum, and maintenance-on cases. Follow-up review: oversized file 10011111 with maintenance off prints false; cargo check --offline and cargo run --offline passed for updated code. All five cases correct; reviewed completion. cargo fmt --check reported whitespace-only differences; source left unchanged. Learner correctly explains <= accepts the maximum. |
 
 ### Learner preferences and current setup
 
 - Experience: software engineer with 10+ years of programming experience.
 - Goal: learn Rust gradually, from basics to advanced concepts, with practical exercises for every topic.
 - Exercise style: realistic, focused tasks; build toward a useful project when helpful.
-- Rust compiler version: not checked yet.
-- Cargo version: not checked yet.
-- Rust edition and toolchain configuration: not checked yet.
+- Rust compiler version: rustc 1.99.1 (58cf8f9c3 2026-10-13), verified 2026-10-17; now available on PATH.
+- Cargo version: cargo 1.99.1 (5f94df478 2026-08-27), verified 2026-10-17; now available on PATH.
+- Rust edition and toolchain configuration: workspace-card, e02-stock-tracker, e03-download-size-display, and e05-upload-eligibility use edition 2024; no rust-toolchain configuration files found in workspace.
 - Preferred project domain: not selected.
 
 ### Session notes
 
-- Current state: coaching context created; no lessons taught or exercises proposed.
-- Next step: check the available Rust toolchain, then teach a short getting-started lesson and propose its first exercise.
-- Open questions or learning gaps: none recorded yet.
+- Current state: E05/T02d complete by reviewed code, five correct runtime cases, and explanation. Formatting check still reports whitespace-only differences; learner source unchanged. E04 remains skipped; E01 explanation pending.
+- Next step: teach a short lesson on if expressions with a new exercise when learner requests continuation. Optional cargo fmt cleanup for E05. Do not revisit E04 unless requested. E01 explanation remains pending.
+- Open questions or learning gaps: conceptual explanation for E01 pending; toolchain is now available.
