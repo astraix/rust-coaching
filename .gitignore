@@ -1,0 +1,24 @@
+# Cargo build output (including nested exercise projects)
+target/
+
+# Rust compiler artifacts and rustfmt backups
+*.rlib
+*.rmeta
+*.rs.bk
+*.o
+*.exe
+*.pdb
+*.dSYM/
+
+# Coverage and profiling output
+*.profraw
+*.profdata
+
+# Editor and OS temporary files
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Keep Cargo.lock tracked for reproducible exercise builds.
