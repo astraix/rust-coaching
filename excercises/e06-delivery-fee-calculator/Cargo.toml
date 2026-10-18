@@ -1,0 +1,6 @@
+[package]
+name = "e06-delivery-fee-calculator"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
