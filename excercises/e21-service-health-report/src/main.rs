@@ -4,17 +4,21 @@ struct Service {
     response_time_ms: u32,
 }
 
+enum ServiceStatus {
+    Ready,
+    Slow(u32),
+    Unreachable,
+}
+
 impl Service {
-    fn ready(&self, response_time_threshold_ms: u32) -> bool {
-        self.reachable && self.response_time_ms <= response_time_threshold_ms
-    }
-    fn print_report(&self, response_time_threshold_ms: u32) {
-        println!(
-            "Service {} is ready [{}] with a response time of {} ms",
-            self.name,
-            self.ready(response_time_threshold_ms),
-            self.response_time_ms
-        );
+    fn status(&self, response_time_threshold_ms: u32) -> ServiceStatus {
+        if !self.reachable {
+            ServiceStatus::Unreachable
+        } else if self.response_time_ms > response_time_threshold_ms {
+            ServiceStatus::Slow(self.response_time_ms)
+        } else {
+            ServiceStatus::Ready
+        }
     }
 }
 
@@ -51,10 +55,19 @@ fn print_services_report(services: &Vec<Service>, response_time_threshold_ms: u3
     println!("---- Health Service Report with response time {response_time_threshold_ms} ----");
     let mut services_ready: u32 = 0;
     for service in services {
-        service.print_report(response_time_threshold_ms);
-        if service.ready(response_time_threshold_ms) {
+        let service_status = service.status(response_time_threshold_ms);
+        let service_status_str = match service_status {
+            ServiceStatus::Ready => String::from("ready"),
+            ServiceStatus::Slow(latency) => format!("slow with latency {latency} and"),
+            ServiceStatus::Unreachable => String::from("unreachable"),
+        };
+        if let ServiceStatus::Ready = service_status {
             services_ready += 1;
         }
+        println!(
+            "Service {} is {service_status_str} with a response time of {} ms",
+            service.name, service.response_time_ms
+        );
     }
     println!("-- Total services scanned: {}", services.len());
     println!("-- Total services READY: {services_ready}");
