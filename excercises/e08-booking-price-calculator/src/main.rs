@@ -14,7 +14,10 @@ fn main() {
         println!("Unavailable");
     } else {
         let budget = 95;
-        let customer = String::from("Jimbo Bimbo");
+        let mut customer = String::from("Jimbo Bimbo");
+        let customer_shared = &customer;
+        customer_confirmation(customer_shared);
+        customer_append_registration_mark(&mut customer);
         customer_confirmation(&customer);
         customer_confirmation("Wambo Jambo");
         let customer_budget = budget;
@@ -49,4 +52,8 @@ fn most_seats_affordable(budget_amount: i32, booking_service_open: bool) -> (i32
 
 fn customer_confirmation(customer_name: &str) {
     println!("{customer_name} CONFIRMED");
+}
+
+fn customer_append_registration_mark(customer_name: &mut String) {
+    customer_name.push_str("_registered");
 }
