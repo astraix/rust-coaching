@@ -1,3 +1,5 @@
+use crate::ServiceError::{ExcessiveLatency, Unnamed};
+
 struct Service {
     name: String,
     reachable: bool,
@@ -10,6 +12,11 @@ enum ServiceStatus {
     Unreachable,
 }
 
+enum ServiceError {
+    Unnamed,
+    ExcessiveLatency(u32),
+}
+
 impl Service {
     fn status(&self, response_time_threshold_ms: u32) -> ServiceStatus {
         if !self.reachable {
@@ -18,6 +25,15 @@ impl Service {
             ServiceStatus::Slow(self.response_time_ms)
         } else {
             ServiceStatus::Ready
+        }
+    }
+    fn validate(&self) -> Result<(), ServiceError> {
+        if self.name.is_empty() {
+            Err(ServiceError::Unnamed)
+        } else if self.reachable && self.response_time_ms > 60000 {
+            Err(ServiceError::ExcessiveLatency(self.response_time_ms))
+        } else {
+            Ok(())
         }
     }
 }
@@ -51,6 +67,20 @@ fn main() {
         reachable: true,
         response_time_ms: 0,
     });
+
+    match validate_batch(&services) {
+        Ok(()) => {}
+        Err(service_error) => {
+            let error_message = match service_error {
+                Unnamed => String::from("Service with no name"),
+                ExcessiveLatency(latency) => {
+                    format!("Service reachable with an excessive latency of {latency} ms")
+                }
+            };
+            println!("Validation error: {error_message}");
+            return;
+        }
+    }
 
     print_services_report(&services, 201);
     print_services_report(&services, 5100);
@@ -94,4 +124,11 @@ fn lowest_response_time(services: &[Service]) -> Option<u32> {
         }
     }
     lowest
+}
+
+fn validate_batch(services: &[Service]) -> Result<(), ServiceError> {
+    for service in services {
+        service.validate()?
+    }
+    Ok(())
 }
