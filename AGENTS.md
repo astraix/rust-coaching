@@ -90,6 +90,8 @@ Maintain the tables below as lessons proceed. Read this file at the start of a c
 | T06 | Structs, methods, enums, patterns, and `Option` | Planned | — | |
 | T06a | Named structs, construction, field access, and methods with &self | Complete | E21 | Reviewed 2026-10-24: owned String fields, correct borrowing readiness and report methods; understanding demonstrated in code. |
 | T06b | Enums with data and exhaustive matching with payload bindings | Complete | E22 | Reviewed 2026-10-24: correct enum construction, payload binding, exhaustive reporting match, and String-valued match using format!. See accepted deviations in E22. |
+| T05e | Borrowed slices: &[T], Vec coercion, and range-based views | Complete | E24 | Reviewed E24 complete 2026-10-26: slice parameters and full/subset/empty views preserve collection. |
+| T06d | Option<T>, Some/None, and exhaustive handling of absence | Complete | E24 | Reviewed E24 complete 2026-10-26: correct optional minimum, zero versus absence, exhaustive output match; learner independently used is_none_or with closure. |
 | T06c | if let for handling one enum pattern | Complete | E23 | Reviewed 2026-10-24: correct if let Ready condition increments count; other variants ignored. |
 | T07 | `Result`, error propagation, and panics | Planned | — | |
 | T08 | Collections, iterators, and closures | Planned | — | |
@@ -149,18 +151,21 @@ Maintain the tables below as lessons proceed. Read this file at the start of a c
 
 | E23 | T06c | Replace separate ready-counting match in service-health-report with if let; preserve counts 2/4 and 3/4. Success: one-pattern conditional handling with unchanged behavior. | Complete | excercises/e21-service-health-report/src/main.rs | Reviewed completion 2026-10-24: if let ServiceStatus::Ready = service_status increments counter; formatting match retained and status computed once. cargo check/run --offline and fmt --check pass; counts 2/4 and 3/4. Source unchanged during review. |
 
+| E24 | T05e, T06d | Extend service-health-report: report and analysis functions borrow slices rather than &Vec. Add a function returning Option<u32> for lowest latency among reachable services, ignoring unreachable services; None when no reachable services exist. Report summary explicitly distinguishes a measured minimum (including zero) from no reachable services, using match. Preserve existing per-service status and ready counts. Demonstrate full collection, a nonempty subset, an all-unreachable input, and an empty slice; reuse original Vec afterward. No clones, dependencies, iterators/adapters, unwrap, or sentinel values; use taught loops and matching. Success: slice-based reusable reporting, correct optional minimum and empty/unreachable handling, check/run pass. | Complete | excercises/e21-service-health-report/src/main.rs | Reviewed 2026-10-26: check/run --offline pass; full reports Some(0), ready 2/5 and 3/5; unreachable subset and empty slice return None. Six assertions on temporary source copy verify empty, unreachable zero, first reachable, decreasing minimum, later larger value, and reachable zero. Source unchanged. fmt --check reports missing arm comma and trailing whitespace. Learner independently uses Option::is_none_or with closure (not an iterator adapter); brief semantics explained, formal closures lesson deferred. |
+
 ### Learner preferences and current setup
 
 - Experience: software engineer with 10+ years of programming experience.
 - Goal: learn Rust gradually, from basics to advanced concepts, with practical exercises for every topic.
 - Exercise style: realistic, substantial feature-sized tasks in the existing domain and codebase. Learner requested faster pacing on 2026-10-24 after repeated exercises adding only a couple of lines. Group related concepts, keep explanations concise, and let exercises carry more learning. Avoid repeated micro-edits and review rounds for incidental details. New domains should add learning value or follow a learner request.
-- Rust compiler version: rustc 1.99.1 (58cf8f9c3 2026-10-13), verified 2026-10-24; available on PATH.
-- Cargo version: cargo 1.99.1 (5f94df478 2026-08-27), verified 2026-10-24; available on PATH.
+- Rust compiler version: rustc 1.96.0 (ac68faa20 2026-05-25), verified 2026-10-26; available on PATH.
+- Cargo version: cargo 1.96.0 (30a34c682 2026-05-25), verified 2026-10-26; available on PATH.
 - Rust edition and toolchain configuration: booking calculator (verified 2026-10-21), workspace-card, e02-stock-tracker, e03-download-size-display, and e05-upload-eligibility use edition 2024; no rust-toolchain configuration files found in workspace.
 - Preferred project domain: not selected.
 
 ### Session notes
 
-- Current state: T06b/E22 reviewed complete 2026-10-24. Enums with payloads, exhaustive matching, and String-valued match using format! demonstrated. All checks pass; follow-up now uses actual measured latency and method name status. Latest follow-up evaluates status once per row and reuses it correctly; check/run/fmt pass. E22 complete, no required revisions.
-- Next step: T06c/E23 reviewed complete; current code correctly uses if let for counting and match for formatting. Await questions or continuation; continue feature-sized work in service-health-report, with slices and/or Option as possible next topics. e08 retired from further extensions. Slice parameters have not yet been taught; &Vec<Service> remains acceptable.
-- Open questions or learning gaps: E01 explanation pending; E04 skipped. Slices, UTF-8 indexing, cloning, explicit lifetimes not yet taught. Toolchain reverified 2026-10-24 (rustc/cargo 1.99.1); E21 manifest edition 2024, no toolchain configuration found.
+- Current state: T05e/T06d/E24 reviewed complete 2026-10-26. Correct slices and Option minimum, caller reuse, empty/all-unreachable cases and valid zero. cargo check/run --offline pass; six additional assertions pass in temporary source copy. Formatting-only differences left unchanged.
+- Next step: await questions or continuation; Result and recoverable errors are a possible next feature-sized unit in service-health-report. Learner independently used is_none_or with a closure; semantics briefly explained during review, formal closures lesson not yet taught.
+- Open gaps: E01 explanation pending; E04 skipped. UTF-8 indexing, cloning, explicit lifetimes not yet taught. No unwrap taught.
+- Setup verified 2026-10-26: rustc 1.96.0 (ac68faa20 2026-05-25), cargo 1.96.0 (30a34c682 2026-05-25). Current service-health-report manifest uses edition 2024, no dependencies; no rust-toolchain configuration found.
