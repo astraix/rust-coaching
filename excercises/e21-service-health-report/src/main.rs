@@ -1,5 +1,3 @@
-use crate::ServiceError::{ExcessiveLatency, Unnamed};
-
 struct Service {
     name: String,
     reachable: bool,
@@ -72,8 +70,8 @@ fn main() {
         Ok(()) => {}
         Err(service_error) => {
             let error_message = match service_error {
-                Unnamed => String::from("Service with no name"),
-                ExcessiveLatency(latency) => {
+                ServiceError::Unnamed => String::from("Service with no name"),
+                ServiceError::ExcessiveLatency(latency) => {
                     format!("Service reachable with an excessive latency of {latency} ms")
                 }
             };
