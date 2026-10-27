@@ -113,6 +113,12 @@ fn print_services_report(services: &[Service], response_time_threshold_ms: u32) 
     println!("-- Total services scanned: {}", services.len());
     println!("-- Total services READY: {services_ready}");
     println!("-- Lowest response time: {lowest_response_time_str}");
+
+    let readiness_check = check_readiness(services, response_time_threshold_ms);
+    println!(
+        "-- Readiness report: ready count {}, alerts: {:?}",
+        readiness_check.0, readiness_check.1
+    );
     println!("---- End of Report ---")
 }
 
@@ -131,4 +137,27 @@ fn validate_batch(services: &[Service]) -> Result<(), ServiceError> {
         service.validate()?
     }
     Ok(())
+}
+
+fn check_readiness(services: &[Service], response_time_threshold_ms: u32) -> (usize, Vec<String>) {
+    let ready_count = services
+        .iter()
+        .map(|x| x.status(response_time_threshold_ms))
+        .filter(|service_status| matches!(service_status, ServiceStatus::Ready))
+        .count();
+
+    let alerts = services
+        .iter()
+        .map(|s| (s, s.status(response_time_threshold_ms)))
+        .filter_map(|(s, status)| match status {
+            ServiceStatus::Ready => None,
+            ServiceStatus::Slow(delay) => Some(format!(
+                "Service {} is slow with a delay of {delay} ms",
+                s.name
+            )),
+            ServiceStatus::Unreachable => Some(format!("Service {} is unreachable", s.name)),
+        })
+        .collect();
+
+    (ready_count, alerts)
 }
