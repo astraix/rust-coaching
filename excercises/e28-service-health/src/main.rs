@@ -1,82 +1,40 @@
-use std::{collections::HashMap, fmt::Display};
+mod health;
 
-struct Service {
-    name: String,
-    reachable: bool,
-    response_time_ms: u32,
-}
-
-enum ServiceStatus {
-    Ready,
-    Slow(u32),
-    Unreachable,
-}
-
-impl Display for ServiceStatus {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ServiceStatus::Ready => write!(f, "Ready"),
-            ServiceStatus::Slow(delay) => write!(f, "Slow with a delay of {}", delay),
-            ServiceStatus::Unreachable => write!(f, "Unreachable"),
-        }
-    }
-}
-
-impl Service {
-    fn status(&self, response_time_threshold_ms: u32) -> ServiceStatus {
-        if !self.reachable {
-            ServiceStatus::Unreachable
-        } else if self.response_time_ms > response_time_threshold_ms {
-            ServiceStatus::Slow(self.response_time_ms)
-        } else {
-            ServiceStatus::Ready
-        }
-    }
-}
-
-fn compute_service_status(
-    services: &[Service],
-    response_time_threshold_ms: u32,
-) -> HashMap<String, ServiceStatus> {
-    let mut status_map: HashMap<String, ServiceStatus> = HashMap::new();
-    for service in services {
-        status_map.insert(
-            service.name.clone(),
-            service.status(response_time_threshold_ms),
-        );
-    }
-    status_map
-}
+use crate::health::{Service, compute_service_status};
 
 fn main() {
     let services = vec![
-        Service {
-            name: String::from("Gumbo"),
-            reachable: true,
-            response_time_ms: 10,
-        },
-        Service {
-            name: String::from("Jimbo"),
-            reachable: false,
-            response_time_ms: 20,
-        },
-        Service {
-            name: String::from("Rombo"),
-            reachable: false,
-            response_time_ms: 200,
-        },
-        Service {
-            name: String::from("Bembo"),
-            reachable: true,
-            response_time_ms: 5000,
-        },
-        Service {
-            name: String::from("Bembo"),
-            reachable: true,
-            response_time_ms: 6000,
-        },
+        Service::new(String::from("Gumbo"), true, 10),
+        Service::new(String::from("Jimbo"), false, 20),
+        Service::new(String::from("Rombo"), false, 200),
+        Service::new(String::from("Bembo"), true, 5000),
+        Service::new(String::from("Bembo"), true, 6000),
     ];
 
-    let services_status = compute_service_status(&services, 5000);
-    println!("Bembo status is {}", services_status.get("Bembo").unwrap())
+    let services_status_5000 = compute_service_status(&services, 5000);
+    println!(
+        "Bembo status is {}",
+        services_status_5000.get("Bembo").unwrap()
+    );
+
+    let services_status_7000 = compute_service_status(&services, 7000);
+    println!(
+        "Bembo status is {}",
+        services_status_7000.get("Bembo").unwrap()
+    );
+    println!(
+        "Rombo status is {}",
+        services_status_7000.get("Rombo").unwrap()
+    );
+
+    match services_status_7000.get("Unknown") {
+        Some(service_status) => println!("Found Unknown with status {}", service_status),
+        None => println!("Unknown not found"),
+    }
+
+    let empty_service_status = compute_service_status(&[], 1000);
+    match empty_service_status.get("Gumbo") {
+        Some(service_status) => println!("Found Gumbo with status {}", service_status),
+        None => println!("Gumbo not found"),
+    }
 }
