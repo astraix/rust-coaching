@@ -1,0 +1,4 @@
+Bembo: Slow with a delay of 6000 ms
+Jimbo: Unreachable
+Rombo: Unreachable
+Gumbo: Ready

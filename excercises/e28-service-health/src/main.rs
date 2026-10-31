@@ -1,6 +1,8 @@
 mod health;
 
-use crate::health::{Service, compute_service_status};
+use std::{collections::HashMap, io};
+
+use crate::health::{Service, ServiceStatus, compute_service_status, service_status_report_text};
 
 fn main() {
     let services = vec![
@@ -11,7 +13,7 @@ fn main() {
         Service::new(String::from("Bembo"), true, 6000),
     ];
 
-    let services_status_5000 = compute_service_status(&services, 5000);
+    let services_status_5000 = &compute_service_status(&services, 5000);
     println!(
         "Bembo status is {}",
         services_status_5000.get("Bembo").unwrap()
@@ -32,9 +34,27 @@ fn main() {
         None => println!("Unknown not found"),
     }
 
-    let empty_service_status = compute_service_status(&[], 1000);
+    let empty_service_status = &compute_service_status(&[], 1000);
     match empty_service_status.get("Gumbo") {
         Some(service_status) => println!("Found Gumbo with status {}", service_status),
         None => println!("Gumbo not found"),
     }
+
+    for (filename, snapshot) in [
+        ("report1.txt", services_status_5000),
+        ("empty_report.txt", empty_service_status),
+        ("idk/helo.txt", empty_service_status),
+    ] {
+        if let Err(error) = write_service_status_report(filename, snapshot) {
+            println!("Error while writing file {filename}: {error}");
+        }
+    }
+}
+
+fn write_service_status_report(
+    filename: &str,
+    service_map: &HashMap<String, ServiceStatus>,
+) -> io::Result<()> {
+    let report_text = service_status_report_text(service_map);
+    std::fs::write(filename, report_text)
 }
